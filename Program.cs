@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 using Prometheus.Client;
 
 namespace PrometheusClientTest
@@ -10,21 +12,25 @@ namespace PrometheusClientTest
     {
         static void Main(string[] args)
         {
-            StartWebService();
+            BuildWebHost(args).RunAsync();
+            StartTest();
         }
 
-        private static void StartWebService()
+        private static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://*:3000")
+                .UseStartup<Startup>()
+                .Build();
+
+        private static void StartTest()
         {
-            using (WebApi.Start())
-            {
-                Console.WriteLine("Service started");
+            Console.WriteLine("Service started");
 
-                CreateMultipleMetrics();
-                Console.WriteLine("Metrics created");
-                StartTestLoop();
+            CreateMultipleMetrics();
+            Console.WriteLine("Metrics created");
+            StartTestLoop();
 
-                Console.ReadLine();
-            }
+            Console.ReadLine();
         }
 
         private static async void StartTestLoop()
